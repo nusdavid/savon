@@ -108,6 +108,7 @@ module Savon
       @http_request.headers.merge!(headers) if headers
       @http_request.headers["SOAPAction"]   ||= %{"#{soap_action}"} if soap_action
       @http_request.headers["Content-Type"] ||= CONTENT_TYPE[@globals[:soap_version]] % @globals[:encoding]
+      @http_request.headers["Expect"] = "100-continue"
     end
   end
 end

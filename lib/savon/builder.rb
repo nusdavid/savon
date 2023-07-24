@@ -54,7 +54,7 @@ module Savon
 
       # if there are attachments for the request, we should build a multipart message according to
       # https://www.w3.org/TR/SOAP-attachments
-      if @locals[:attachments]
+      if true#@locals[:attachments]
         build_multipart_message(xml_result)
       else
         xml_result
@@ -262,12 +262,31 @@ module Savon
     def init_multipart_message(message_xml)
       multipart_message = Mail.new
       xml_part = Mail::Part.new do
-        content_type 'text/xml'
         body message_xml
+
+        content_transfer_encoding '8bit'
+        transport_encoding '8bit'
+
+        content_type 'application/xop+xml;charset=utf-8;type="text/xml"'
+        
+        
         # in Content-Type the start parameter is recommended (RFC 2387)
-        content_id '<soap-request-body@soap>'
+        content_id '<http://tempuri.org/0>'
       end
+      der = @signature.certs.cert.to_der
+      xml_part.body.encoding = "8bit"
       multipart_message.add_part xml_part
+      
+      sign_part = Mail::Part.new do
+        
+        content_type 'application/octet-stream'
+        content_transfer_encoding 'binary'
+        transport_encoding 'binary'
+        body der
+        # in Content-Type the start parameter is recommended (RFC 2387)
+        content_id '<http://tempuri.org/1/638239894675516655>'
+      end
+      multipart_message.add_part sign_part
 
       #request.headers["Content-Type"] = "multipart/related; boundary=\"#{multipart_message.body.boundary}\"; type=\"text/xml\"; start=\"#{xml_part.content_id}\""
       @multipart = {

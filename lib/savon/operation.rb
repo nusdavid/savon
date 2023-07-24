@@ -103,10 +103,12 @@ module Savon
       if builder.multipart
         request.gzip
         request.headers["Content-Type"] = ["multipart/related",
-                                           "type=\"#{SOAP_REQUEST_TYPE[@globals[:soap_version]]}\"",
+                                           "type=\"application/xop+xml\"",
                                            "start=\"#{builder.multipart[:start]}\"",
-                                           "boundary=\"#{builder.multipart[:multipart_boundary]}\""].join("; ")
+                                           "boundary=\"#{builder.multipart[:multipart_boundary]}\"",
+                                           "start-info=\"text/xml\""].join("; ")
         request.headers["MIME-Version"] = "1.0"
+        request.headers["Expect"] = "100-continue"
       end
 
       # TODO: could HTTPI do this automatically in case the header
